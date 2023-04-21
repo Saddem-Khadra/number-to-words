@@ -1,25 +1,31 @@
 from fastapi import HTTPException
-from num2words import CONVERTER_CLASSES, num2words
+from num2words import num2words, CONVERTER_CLASSES
+from pydantic import BaseModel
 
 
-def check_key_in_dict(language: str):
+class Item(BaseModel):
+    number: int | float
+    delete_from_sentence: str | None = None
+    currency: str | None = None
+    decimal_currency: str | None = None
+    separator: str | None = None
+    decimal: int | None = None
+    language: str
+
+
+def validate_input_data(item: Item):
     # check if lan in language list
-    if language not in CONVERTER_CLASSES.keys():
+    if item.language not in CONVERTER_CLASSES.keys():
         raise HTTPException(
             status_code=404,
-            detail=f"{language} not in language list"
+            detail=f"{item.language} not in language list"
         )
-    return language
-
-
-def check_int_in_list(decimal: int = None):
-    if decimal in {2, 3} or decimal is None:
-        return decimal
-    else:
+    if item.decimal not in {2, 3} and item.decimal is not None:
         raise HTTPException(
             status_code=404,
             detail=f"decimal number must be in {[2, 3]}"
         )
+    return item
 
 
 def convert_to_currency(
@@ -31,11 +37,7 @@ def convert_to_currency(
         decimal_currency: str = None,
         separator: str = None):
     if isinstance(number, float):
-        if decimal is not None:
-            # number_str = f"%.{decimal}f" % number
-            number_str = f"{number:.{decimal}f}"
-        else:
-            number_str = str(number)
+        number_str = f"{number:.{decimal}f}" if decimal is not None else str(number)
         print(number_str)
         print(type(number_str))
         num_list = number_str.split(".")
