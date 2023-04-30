@@ -1,4 +1,3 @@
-from typing import Union
 from fastapi import HTTPException
 from num2words import num2words, CONVERTER_CLASSES
 from pydantic import BaseModel
