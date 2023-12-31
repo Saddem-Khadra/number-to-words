@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from num2words import num2words, CONVERTER_CLASSES
 from pydantic import BaseModel
+from logger import logger
 
 
 class Item(BaseModel):
@@ -12,11 +13,9 @@ class Item(BaseModel):
     decimal: int | None = None
     language: str
 
-    class Config:
-        smart_union = True
-
 
 def validate_input_data(item: Item):
+    logger.info("Validating input data...")
     # check if lan in language list
     if item.language not in CONVERTER_CLASSES.keys():
         raise HTTPException(
@@ -28,10 +27,12 @@ def validate_input_data(item: Item):
             status_code=404,
             detail=f"decimal number must be in {[2, 3]}"
         )
+    logger.info("Input data validated successfully.")
     return item
 
 
 def convert_to_currency(item: Item) -> str:
+    logger.info("Converting to currency...")
     if isinstance(item.number, float):
         return when_number_is_float(item=item)
     elif isinstance(item.number, int):
@@ -39,6 +40,7 @@ def convert_to_currency(item: Item) -> str:
 
 
 def when_number_is_int(item: Item) -> str:
+    logger.info("Converting when number is int...")
     result = num2words(number=item.number, lang=item.language)
     if item.delete_from_sentence is not None:
         result_list = result.split(" ")
@@ -51,6 +53,7 @@ def when_number_is_int(item: Item) -> str:
 
 
 def when_number_is_float(item: Item) -> str:
+    logger.info("Converting when number is float...")
     number_str = f"{item.number:.{item.decimal}f}" if item.decimal is not None else str(item.number)
     num_list = number_str.split(".")
     part1 = num2words(int(num_list[0]), lang=item.language)

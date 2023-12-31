@@ -1,6 +1,9 @@
-requests==2.29.0
-APScheduler==3.10.1
-fastapi==0.95.1
-starlette==0.26.1
-num2words==0.5.12
-pydantic==1.10.7
+requests==2.31.0
+APScheduler==3.10.4
+fastapi==0.108.0
+pydantic==2.5.3
+num2words==0.5.13
+uvicorn==0.25.0
+gunicorn==21.2.0
+starlette==0.32.0.post1
+colorlog==6.8.0
