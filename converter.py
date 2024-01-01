@@ -31,15 +31,15 @@ def validate_input_data(item: Item):
     return item
 
 
-def convert_to_currency(item: Item) -> str:
+async def convert_to_currency(item: Item) -> str:
     logger.info("Converting to currency...")
     if isinstance(item.number, float):
-        return when_number_is_float(item=item)
+        return await when_number_is_float(item=item)
     elif isinstance(item.number, int):
-        return when_number_is_int(item=item)
+        return await when_number_is_int(item=item)
 
 
-def when_number_is_int(item: Item) -> str:
+async def when_number_is_int(item: Item) -> str:
     logger.info("Converting when number is int...")
     result = num2words(number=item.number, lang=item.language)
     if item.delete_from_sentence is not None:
@@ -52,7 +52,7 @@ def when_number_is_int(item: Item) -> str:
         return f"{result}".replace(',', '')
 
 
-def when_number_is_float(item: Item) -> str:
+async def when_number_is_float(item: Item) -> str:
     logger.info("Converting when number is float...")
     number_str = f"{item.number:.{item.decimal}f}" if item.decimal is not None else str(item.number)
     num_list = number_str.split(".")

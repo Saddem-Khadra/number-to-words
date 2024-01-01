@@ -8,6 +8,7 @@ from starlette.middleware.cors import CORSMiddleware
 from converter import convert_to_currency, Item, validate_input_data
 from logger import logger
 from middleware import log_middleware
+from validate_certificate import CertificateInput
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
 app.add_middleware(
@@ -23,12 +24,17 @@ app.add_middleware(
 )
 
 
-@app.post("/api/converter/")
+@app.post("/api/converter")
 async def converter(item: Item = Depends(validate_input_data)):
     logger.info(f"Received conversion request: {item}")
-    result = convert_to_currency(item=item)
+    result = await convert_to_currency(item=item)
     logger.info(f"Conversion result: {result}")
     return {"message": result}
+
+
+@app.post("/validate-certificate")
+async def validate_certificate(cert_input: CertificateInput):
+    pass
 
 
 def my_job(url: str):
