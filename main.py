@@ -8,7 +8,6 @@ from starlette.middleware.cors import CORSMiddleware
 from converter import convert_to_currency, Item, validate_input_data
 from logger import logger
 from middleware import log_middleware
-from validate_certificate import CertificateInput
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
 app.add_middleware(
@@ -24,17 +23,18 @@ app.add_middleware(
 )
 
 
-@app.post("/api/converter")
+# Define a health check endpoint
+@app.get("/healthcheck")
+async def healthcheck():
+    return {"status": "OK"}
+
+
+@app.post("/api/converter/")
 async def converter(item: Item = Depends(validate_input_data)):
     logger.info(f"Received conversion request: {item}")
-    result = await convert_to_currency(item=item)
+    result = convert_to_currency(item=item)
     logger.info(f"Conversion result: {result}")
     return {"message": result}
-
-
-@app.post("/validate-certificate")
-async def validate_certificate(cert_input: CertificateInput):
-    pass
 
 
 def my_job(url: str):
@@ -49,14 +49,19 @@ def my_job(url: str):
         "language": "fr"
     }
     headers = {'content-type': 'application/json'}
-    response = requests.post(url, json=payload, headers=headers)
-    logger.info(f"Job response: {response.text}")
+    try:
+        logger.info(f"URL: {url}")
+        response = requests.post(url, json=payload, headers=headers)
+        logger.info(f"Job response: {response.text}")
+    except Exception as e:
+        logger.error(f"Error in job: {e}")
 
 
 @app.get("/")
 async def schedule_job(request: Request):
-    logger.info(f"Received schedule job request: {request.base_url}")
-    job_with_params = partial(my_job, url=f"{request.base_url}api/converter/")
+    base_url = request.base_url.hostname
+    logger.info(f"Received schedule job request: {base_url}")
+    job_with_params = partial(my_job, url=f"https://{base_url}/api/converter/")
     scheduler = BackgroundScheduler()
     scheduler.add_job(job_with_params, 'cron', minute='*/5')
     scheduler.start()
