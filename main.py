@@ -33,7 +33,7 @@ async def healthcheck():
 @app.post("/api/converter/")
 async def converter(item: Item = Depends(validate_input_data)):
     logger.info(f"Received conversion request: {item}")
-    result = convert_to_currency(item=item)
+    result = await convert_to_currency(item=item)
     logger.info(f"Conversion result: {result}")
     return {"message": result}
 
