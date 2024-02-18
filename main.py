@@ -19,6 +19,11 @@ app.add_middleware(
 )
 
 
+@app.get("/")
+async def home():
+    return {"status": "OK"}
+
+
 # Define a health check endpoint
 @app.get("/healthcheck")
 async def healthcheck():

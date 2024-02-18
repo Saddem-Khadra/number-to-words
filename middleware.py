@@ -1,7 +1,6 @@
 from fastapi import Request
 from logger import logger
 import time
-import socket
 
 
 async def log_middleware(request: Request, call_next):
@@ -14,7 +13,6 @@ async def log_middleware(request: Request, call_next):
         "process_time": process_time,
         "client_ip": request.client.host,
         "user_agent": request.headers.get("User-Agent", "Unknown"),
-        "container_id": socket.gethostname()
     }
     logger.info(log_dict, extra=log_dict)
     return response
